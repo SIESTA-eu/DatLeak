@@ -1,10 +1,14 @@
+When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
+
 ## Table of Contents
 - [Tabular DataLeak](#tabular-dataleak)
+  - [Method](#tabular-method)
+  - [Usage](#tabular-usage)
 - [NeuroImaging DataLeak](#neuroimaging-dataleak)
 - [Purpose](#purpose)
-- [Methods](#methods)
+  - [Method](#neuroimaging-method)
   - [Pseudocode](#pseudocode)
-  - [Usage](#usage)
+  - [Usage](#neuroimaging-usage)
   - [Output](#output)
   - [Full/Partial Leakage Calculation](#fullpartial-leakage-calculation)
 - [HTML report](#html-report)
@@ -12,14 +16,9 @@
 
 # Tabular DataLeak
 Methods for detection of data leakage in a tabular dataset.
-
-
-When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
-
+## Method {#tabular-method}
 ### Full Leakage
-
 A row/participant $i$ is considered to have **full leakage** if the number of matching cells equals the number of valid cells in that row. The condition for full leakage for row $i$ is:
-
 
 ```math
 \text{Full Leakage for Row } i = 
@@ -49,14 +48,9 @@ A row/participant $i$ is considered to have **partial leakage** if the number of
 
 This formula checks if some, but not all, valid cells match between the original and scrambled rows, indicating partial leakage. 
 
-This script detects data leakage by comparing an original dataset with an anonymized version. It calculates percentages of full leakage (all variables are the same), and partial leakage (some variables are the same). In the latter case, it does so by averaging matching cells (per row). The script accepts command-line inputs for the dataset files (CSV or TSV) and an optional ignore value.
+The script detects data leakage in a tabular dataset by comparing an original with an anonymized version. It calculates percentages of full leakage (all variables are the same), and partial leakage (some variables are the same). In the latter case, it does so by averaging matching cells (per row). The script accepts command-line inputs for the dataset files (CSV or TSV) and an optional ignore value.
 
-### Requirements
-- pandas
-- numpy
-- python 3.x
-
-### Usage 
+## Usage {#tabular-usage}
 
 ```
 python DatLeak.py <original_file> <scrambled_file> [ignore_value] [ignore_col]
@@ -92,15 +86,13 @@ Standard Deviation of Matching Cells per Row: 1.68
 
 # NeuroImaging DataLeak
 
-
-
 ## Introduction
 **DataLeak**age analysis in neuro-imaging data
 
 ## Purpose
 The purpose of this repository is to analyze information leakage in two neuro-imaging dataset of **Original** and **Scrambled/Synthetic**. We use 3 known methods to measure the similarity between slices by quantifying leakage across all dimensions of the image.
 
-## Methods:
+## Method{#neuroimaging-method}
 The idea of using three methods is to quantify information leakage is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
 
 `NOTE` Due to the computationally intensive nature of comparing large 3D to 4D arrays slice by slice, we implemented SSIM and Pearson correlation manually instead of using built-in functions from libraries like scipy. To optimize performance, we use [`numba`](https://pypi.org/project/numba/) to JIT-compile the function. However, numba does not support external Python callables like scipy.stats.pearsonr or skimage.ssim
@@ -140,7 +132,7 @@ return mean(3D)
 
 # Method 2
 ```
-## Usage
+## Usage {#neuroimaging-usage}
 ```terminal
 python run.py <Original Base Dir> <Scrambled Base Dir> [report]
 ```
