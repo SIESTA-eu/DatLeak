@@ -16,7 +16,7 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 # Tabular DataLeak
 Methods for detection of data leakage in a tabular dataset.
-## Method {#tabular-method}
+## Method{#tabular-method}
 ### Full Leakage
 A row/participant $i$ is considered to have **full leakage** if the number of matching cells equals the number of valid cells in that row. The condition for full leakage for row $i$ is:
 
