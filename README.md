@@ -2,7 +2,7 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 ## Table of Contents
 - [Tabular DataLeak](#tabular-dataleak)
-  - [Method](#tabular-method)
+  - [Method](#tabular-metho)
   - [Usage](#tabular-usage)
 - [NeuroImaging DataLeak](#neuroimaging-dataleak)
 - [Purpose](#purpose)
@@ -16,7 +16,7 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 # Tabular DataLeak
 Methods for detection of data leakage in a tabular dataset.
-## Method {#tabular-method}  
+## Method (Tabular) 
 ### Full Leakage
 A row/participant $i$ is considered to have **full leakage** if the number of matching cells equals the number of valid cells in that row. The condition for full leakage for row $i$ is:
 
@@ -92,7 +92,7 @@ Standard Deviation of Matching Cells per Row: 1.68
 ## Purpose
 The purpose of this repository is to analyze information leakage in two neuro-imaging dataset of **Original** and **Scrambled/Synthetic**. We use 3 known methods to measure the similarity between slices by quantifying leakage across all dimensions of the image.
 
-## Method{#neuroimaging-method}
+## Method (NeuroImaging)
 The idea of using three methods is to quantify information leakage is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
 
 `NOTE` Due to the computationally intensive nature of comparing large 3D to 4D arrays slice by slice, we implemented SSIM and Pearson correlation manually instead of using built-in functions from libraries like scipy. To optimize performance, we use [`numba`](https://pypi.org/project/numba/) to JIT-compile the function. However, numba does not support external Python callables like scipy.stats.pearsonr or skimage.ssim
