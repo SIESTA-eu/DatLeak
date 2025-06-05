@@ -1,3 +1,4 @@
+# UNDER DEVELOPMENT
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
 ## Table of Contents
