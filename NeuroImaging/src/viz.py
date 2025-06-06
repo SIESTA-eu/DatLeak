@@ -18,8 +18,8 @@ def viz_report(p_corrs, s_corrs, f_l_corrs,loop, file_shape=None):
     #num_bins = min(50, max(1, int(np.sqrt(len(np.unique(np.nanmax(p_corrs, axis=1)))))))
     #if num_bins < 2: 
     #    num_bins = 100
-    #sns.histplot(list(np.nanmax(p_corrs, axis=1)), bins = num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws) 
-    sns.histplot(p_corrs.diagonal(), bins = num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws) 
+    sns.histplot(list(np.nanmax(p_corrs, axis=1)), bins = num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws) 
+    #sns.histplot(p_corrs.diagonal(), bins = num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws) 
     ax2.set_title("Distribution of Pearson MAX")
     ax2.set_xlabel("Correlation Coefficient")
     ax2.set_ylabel("Frequency")
@@ -34,8 +34,8 @@ def viz_report(p_corrs, s_corrs, f_l_corrs,loop, file_shape=None):
     #num_bins = min(50, max(1, int(np.sqrt(len(np.unique(np.nanmax(s_corrs, axis=1)))))))
     #if num_bins == 1 or num_bins < 2: 
     #    num_bins = 100
-    #sns.histplot(np.nanmax(s_corrs, axis=1), bins = num_bins, kde=True, color='skyblue', ax=ax4, **hist_kws)
-    sns.histplot(s_corrs.diagonal(), bins = num_bins, kde=True, color='skyblue', ax=ax4, **hist_kws) 
+    sns.histplot(np.nanmax(s_corrs, axis=1), bins = num_bins, kde=True, color='skyblue', ax=ax4, **hist_kws)
+    #sns.histplot(s_corrs.diagonal(), bins = num_bins, kde=True, color='skyblue', ax=ax4, **hist_kws) 
     ax4.set_title("Distribution of SSIM MAX")
     ax4.set_xlabel("Correlation Coefficient")
     ax4.set_ylabel("Frequency")    
@@ -118,11 +118,23 @@ def viz_(data, slice_=int, png_title= None):
     plt.close()
 
 
-def viz_psd(data, type_=None):
+def viz_psd(data_path, type_=None, which=None):
     
-    data.plot(average=True, picks='data',color="blue")  
-    plt.title(f"Power Spectral Density (PSD)[{type_}]")
+    import mne
+    if type_ == "fif":
+        d = mne.io.read_raw_fif(data_path, preload=True)
+        psd = d.compute_psd(method='welch', fmin=1, fmax=100)
+    if type_ == "vhdr":
+        d = mne.io.read_raw_brainvision(data_path, preload=True)
+        eeg_channels = list(d.ch_names)
+        eog_channels = ['HEOG_left', 'HEOG_right', 'VEOG_lower']
+        d.set_channel_types({ch: 'eeg' for ch in eeg_channels})
+        d.set_channel_types({ch: 'eog' for ch in eog_channels})
+        psd = d.compute_psd(picks='eeg', fmin=1, fmax=100)
+    
+    psd.plot(average=True, picks='data',color="blue")  
+    plt.title(f"Power Spectral Density (PSD)[{which}]")
     plt.tight_layout()
-    plt.savefig(f"img/{type_}.png")
+    plt.savefig(f"img/{which}.png")
     plt.close()
 

@@ -61,8 +61,8 @@ class fetch_files:
 
         sorted_files = []
         for (_, folder), files in sorted(ff.items(), key=lambda x: self.sort_keys(x[0][1])):
-            files.sort(key=lambda f: extract_(os.path.basename(f)))
-            sorted_files.extend(files)
+            #files.sort(key=lambda f: extract_(os.path.basename(f)))
+            sorted_files.extend(sorted(files))
 
         return sorted_files
 
@@ -112,6 +112,9 @@ class neuro_reader:
         elif ext == '.vhdr':
             self.file_type = 'vhdr'
             self.raw = mne.io.read_raw_brainvision(self.file_path, preload=True)
+        elif ext == '.set':
+            self.file_type = 'set'
+            self.raw = mne.io.read_raw_eeglab(self.file_path, preload=True)
         else:
             raise ValueError(f"Unsupported file extension: {ext}")
 

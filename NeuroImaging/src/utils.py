@@ -29,7 +29,7 @@ def detect_file(folder):
 
 
 def leak_detect(results, type_):
-    if type_ == "anat": 
+    if type_ == "anat" or type_ == "func": 
         fl_p = np.nanmean([results["x"]['p_corr_fl'], results["z"]['p_corr_fl'], results["y"]['p_corr_fl']])
         fl_f = np.nanmean([results["x"]['f_corr_fl'], results["z"]['f_corr_fl'], results["y"]['f_corr_fl']])
         if fl_p == 0.0 and fl_f == 0.0:
@@ -37,17 +37,19 @@ def leak_detect(results, type_):
         else: fl = True
         pl = np.nanmean([results["x"]['p_corr_pl_max'], results["y"]['p_corr_pl_max'],results["z"]['p_corr_pl_max']])
         return fl, pl
-    if type_ == "func":
-        fl_p = np.nanmean([results["x"]['p_corr_fl'], results["z"]['p_corr_fl'], results["y"]['p_corr_fl'], results["t"]['p_corr_fl']])
-        fl_f = np.nanmean([results["x"]['f_corr_fl'], results["z"]['f_corr_fl'], results["y"]['f_corr_fl'], results["t"]['f_corr_fl']])
-        if fl_p == 0.0 and fl_f == 0.0:
-            fl = False
-        else: fl = True
-        pl = np.nanmean([results["x"]['p_corr_pl_max'], results["y"]['p_corr_pl_max'],results["z"]['p_corr_pl_max'], results["t"]['p_corr_pl_max']])
-        return fl, pl
+
     if type_ == "fif":
         fl, pl = results["fl"], results["pl"]
         return fl, pl
+    if type_ == "vhdr":
+        fl_p = np.nanmean(results["time"]['p_corr_fl'])
+        fl_f = np.nanmean(results["time"]['f_corr_fl'])
+        if fl_p == 0.0 and fl_f == 0.0:
+            fl = False
+        else: fl = True
+        pl = np.nanmean(results["time"]['p_corr_pl_max'])
+        return fl, pl
+
 
 def parse_info(file_, type_):
     parts = file_.split('/')[-1].split('_')
@@ -62,10 +64,12 @@ def parse_info(file_, type_):
     else:
         raise ValueError("Unknown data type")
 
-def summary(matrix):
-    
-    f_l = (np.concatenate([arr[arr >= 0.99999] for arr in np.nanmax(matrix,axis=1)]).shape[0] / 
+def summary(matrix,type_=None):
+    if type_ == "nii":
+        f_l = (np.concatenate([arr[arr >= 0.99999] for arr in np.nanmax(matrix,axis=1)]).shape[0] / 
                     (matrix.shape[0] - np.isnan(np.nanmax(matrix,axis=1)).sum())) * 100
+    elif type_ == "fif":
+        f_l = (np.argwhere(matrix >= .99999).shape[0] / matrix.shape[0] - np.isnan(np.nanmax(matrix)).sum()) * 100
     try:
         avg_p_l = np.nanmean(matrix)
     except ValueError:
