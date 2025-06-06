@@ -5,6 +5,8 @@ from numba import njit, prange
 import matplotlib.pyplot as plt
 import seaborn as sns
 from src.report import report
+from src.report_meg import report_meg
+
 from src.loader import *
 from src.viz import *
 from src.logging_config import setup_logging
@@ -14,7 +16,9 @@ from src.leakage_ import *
 logger = setup_logging()
 
 def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 = False,r=False):
-
+    
+    r = False if r == "False" else True
+    
     ext = original_path.split("/")[-1]
     if ext.endswith(".nii") or ext.endswith(".nii.gz"):
         original = nii_reader(original_path).get_data()
@@ -31,10 +35,6 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
     else: 
         print(f" - Unsupported file type.")
     
-
-    #########################################
-    #             VIZ                       #
-    #########################################
     def result_dict():
         keys = [
             "p_corr_fl", "s_corr_fl", "f_corr_fl",
@@ -45,12 +45,12 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
         return {key: [] for key in keys}
 
         
-    if Dim4 == True:
-        results = {"x": result_dict(),"y": result_dict(),"z": result_dict(),"t": result_dict()}
-        axes = ["x", "y", "z", "t"]
-    if Dim4 == False:
-        results = {"x": result_dict(), "y": result_dict(), "z": result_dict()}
-        axes = ["x", "y", "z"]
+    results = {"x": result_dict(), "y": result_dict(), "z": result_dict()}
+    axes = ["x", "y", "z"]
+    
+    #########################################
+    #             VIZ                       #
+    #########################################
     if ext.endswith(".nii") or ext.endswith(".nii.gz"):
         if len(list(original.shape)) == 4:
             viz_(original[...,0], slice_=original.shape[0]//2, png_title= "original.png")
@@ -61,15 +61,19 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
             viz_(scrambled, slice_=original.shape[0]//2, png_title= "scrambled.png")
 
 
-    elif ext.endswith(".fif") or ext.endswith(".fif.gz") or ext.endswith(".vhdr") or ext.endswith(".vhdr.gz"):
-        print(f"TASK! viz not implemented!")
+    elif ext.endswith(".fif") or ext.endswith(".fif.gz"):
+        viz_psd(original_path, type_="fif", which="original")
+        viz_psd(scrambled_path, type_="fif",which="scrambled")
+    elif ext.endswith(".vhdr") or ext.endswith(".vhdr.gz"):
+        viz_psd(original_path, type_="vhdr", which="original")
+        viz_psd(scrambled_path, type_="vhdr",which="scrambled")
     else: print(f" - Unsupported file type.")
     #########################################
     #             SPATIAL ANALYSIS          #
     #########################################
     if ext.endswith(".nii") or ext.endswith(".nii.gz"):
-        print(f" - Full-volume Spatiotemporal Analysis")
-        
+        print(f" - Spatial Analysis")
+        print(f" - Averaged over time dimension")
         for i, axis in enumerate(axes):
             if Dim4:
                 replaced = list()
@@ -92,20 +96,26 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
                             idx = random.randint(10, list(original.shape)[i] - 10)
                             scrambled[:, :, idx, :] = original[:, :, idx, :]
                             replaced.append(idx)
-                    elif axis == "t":
-                        for _ in range(range_):
-                            idx = random.randint(10, list(original.shape)[i] - 10)
-                            scrambled[:, :, :, idx] = original[:, :, :, idx]
-                            replaced.append(idx)
+
                 if random_replace:
                     print(f"\t - Replaced indices in {axis}: {replaced}")
-                logger.info(f"SpatioTemporal Leakage Analysis on 'func'")
-                p_corrs, s_corrs, f_l_corrs = leakage_4D(original, scrambled, axis=i)
+                logger.info(f"Spatial Leakage Analysis on 'func'")
+                p_corrs, s_corrs, f_l_corrs = list(), list(), list()
+                for time in range(original.shape[-1]):
+                    p_corrs_aux, s_corrs_aux, f_l_corrs_aux = leakage_(original[:, :, :, time], scrambled[:, :, :, time], axis=i)
+                    p_corrs.append(p_corrs_aux)
+                    s_corrs.append(s_corrs_aux)
+                    f_l_corrs.append(f_l_corrs_aux)
+                    
+                p_corrs = np.mean(np.stack(p_corrs, axis=0), axis=0)
+                s_corrs = np.mean(np.stack(s_corrs, axis=0), axis=0)
+                f_l_corrs = np.mean(np.stack(f_l_corrs, axis=0), axis=0)
+                
             if not Dim4:
                 replaced = list()
                 random_replace = False
                 if random_replace:
-                    range_ = 5
+                    range_ = 2
                     if axis == "x":
                         for _ in range(range_):
                             idx = random.randint(10, list(original.shape)[i] - 10)
@@ -125,9 +135,9 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
                     print(f"\t - Replaced indices in {axis}: {replaced}")
                 logger.info(f"Spatial Leakage Analysis on 'anat'")
                 p_corrs, s_corrs, f_l_corrs = leakage_(original, scrambled, axis=i)
-            pfl, avg_p_l, min_p_l, max_p_l = summary(p_corrs)
-            sfl, avg_s_l, min_s_l, max_s_l = summary(s_corrs)
-            ffl, avg_f_l, min_f_l, max_f_l = summary(f_l_corrs)
+            pfl, avg_p_l, min_p_l, max_p_l = summary(p_corrs, type_="nii")
+            sfl, avg_s_l, min_s_l, max_s_l = summary(s_corrs, type_="nii")
+            ffl, avg_f_l, min_f_l, max_f_l = summary(f_l_corrs, type_="nii")
     
             result = results[axis]
             result["f_corr_fl"].append(ffl)
@@ -146,25 +156,23 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
             result["s_corr_pl_max"].append(max_s_l)
             left = np.concatenate([arr[arr >= 0.99999] for arr in np.nanmax(p_corrs,axis=1)]).shape[0]
             right = p_corrs.shape[0]# - np.isnan(np.nanmax(p_corrs,axis=1)).sum()
-            if Dim4:
-                print(f"\t - Dimension[{axis.upper()}]: \tFull Leakage: {left}/{right} slices\tPartial Leakage: {round(max_p_l, 2)}") # \tIdentical: {round(ffl, 2)}%
-            if not Dim4:
-                print(f"\t - Dimension[{axis.upper()}]: \tFull Leakage: {left}/{right} slices\tPartial Leakage: {round(max_p_l, 2)}") # \tIdentical: {round(ffl, 2)}%
+            print(f"\t - Dimension[{axis.upper()}]: \tFull Leakage: {left}/{right} slices\tPartial Leakage: {round(max_p_l, 2)}") # \tIdentical: {round(ffl, 2)}%
+
             viz_report(p_corrs, s_corrs, f_l_corrs,loop=i, file_shape=original.shape)
        
     #########################################
     #             SPATIOTEMPORAL            #
     #########################################
         if Dim4:
-            print(f" - Localized Spatiotemporal cube-wise Analysis")
+            print(f" - Spatiotemporal voxel-wise Analysis")
             o_p = cubeT(original, cube_size=1, stride=1)
             o_s = cubeT(scrambled, cube_size=1, stride=1)
-            print(f"\t - Total cubes: {len(o_p)} \tShape {o_p[0].shape}")
+            print(f"\t - Total voxels: {len(o_p)} \tShape {o_p[0].shape}")
             p_corrs, s_corrs,f_l_corrs = leakage_2D(np.array(o_p),np.array(o_s))
             full_leakage = True if np.nanmax(p_corrs) >= 0.99999 else False
             partial_leakage = np.round(np.nanmax(p_corrs),2) 
             #identical = (np.argwhere(f_l_corrs >= .99999).shape[0] / f_l_corrs.shape[0]) * 100
-            print(f"\t - SpatioTemporal: \tFull Leakage: {np.argwhere(p_corrs >= .99999).shape[0]}/{p_corrs.shape[0]} cubes \tPartial Leakage {partial_leakage}") # \tIdentical: {identical}%
+            print(f"\t - SpatioTemporal: \tFull Leakage: {np.argwhere(p_corrs >= .99999).shape[0]}/{p_corrs.shape[0]} voxels \tPartial Leakage {partial_leakage}") # \tIdentical: {identical}%
         
             viz_spatiotemporal(p_corrs, s_corrs,f_l_corrs, file_shape=original.shape)
     #########################################
@@ -172,12 +180,30 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
     #########################################
     elif ext.endswith(".fif") or ext.endswith(".fif.gz") or ext.endswith(".vhdr") or ext.endswith(".vhdr.gz"):
         p_corrs, s_corrs, f_l_corrs = leakage_2D(original,scrambled)
+        pfl, avg_p_l, min_p_l, max_p_l = summary(p_corrs, type_="fif")
+        sfl, avg_s_l, min_s_l, max_s_l = summary(s_corrs, type_="fif")
+        ffl, avg_f_l, min_f_l, max_f_l = summary(f_l_corrs, type_="fif")
+        results = {"time": result_dict()}
+        result = results["time"]
+        result["f_corr_fl"].append(ffl)
+        result["f_corr_pl_avg"].append(avg_f_l)
+        result["f_corr_pl_min"].append(min_f_l)
+        result["f_corr_pl_max"].append(max_f_l)
+       
+        result["p_corr_fl"].append(pfl)
+        result["p_corr_pl_avg"].append(avg_p_l)
+        result["p_corr_pl_min"].append(min_p_l)
+        result["p_corr_pl_max"].append(max_p_l)    
+        result["s_corr_fl"].append(sfl)
+        result["s_corr_pl_avg"].append(avg_s_l)
+        result["s_corr_pl_min"].append(min_s_l)
+        result["s_corr_pl_max"].append(max_s_l)
         
         full_leakage = True if np.nanmax(p_corrs) >= 0.99999 else False
         partial_leakage = np.round(np.nanmax(p_corrs),4) if np.round(np.nanmax(p_corrs),2) == 0.0 else np.round(np.nanmax(p_corrs),2)  
         #identical = (np.argwhere(f_l_corrs >= .99999).shape[0] / f_l_corrs.shape[0]) * 100
         print(f"\t - Temporal: \tFull Leakage: {np.argwhere(p_corrs >= .99999).shape[0]}/{p_corrs.shape[0]} channels \tPartial Leakage {partial_leakage}") # \tIdentical: {identical}%
-        results = {"fl": full_leakage, "pl": partial_leakage}
+        #results = {"fl": full_leakage, "pl": partial_leakage}
         
         viz_spatiotemporal(p_corrs, s_corrs, f_l_corrs)
         
@@ -189,16 +215,17 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
         if not Dim4:
             fl, pl = leak_detect(results, "anat")
     elif ext.endswith(".fif") or ext.endswith(".fif.gz") or ext.endswith(".vhdr") or ext.endswith(".vhdr.gz"):
-        fl, pl = leak_detect(results, "fif") 
-    
+        fl, pl = leak_detect(results, "vhdr")
+        
     #########################################
     #             REPORT                    #
     #########################################
-
+    
     if r:
-
         report_output = subject_name +"_"+ task +"_"+ run_ if task else subject_name
-        report(
+        
+        if ext.endswith(".nii") or ext.endswith(".nii.gz"):
+            report(
             top_image_paths=[
                 "img/original.png",
                 "img/scrambled.png"
@@ -239,8 +266,32 @@ def main(original_path, scrambled_path, subject_name,task=None, run_=None, Dim4 
            s_leakage_z_min=np.mean(results["z"]["s_corr_pl_min"]),
            s_leakage_z_max=np.mean(results["z"]["s_corr_pl_max"]),
            s_leakage_z_avg=np.mean(results["z"]["s_corr_pl_avg"]),           
-           full_leakage=round(fl,2)
-        )
+           full_leakage=fl)
+        elif ext.endswith(".fif") or ext.endswith(".fif.gz"):
+            report_meg(
+            top_image_paths=[
+                "img/original.png",
+                "img/scrambled.png"
+            ],
+            bottom_image_paths=[
+                "img/correlations dist along Time.png"],
+            top_titles=[
+                "Power Spectral Density [Original]",
+                "Power Spectral Density [Scrambled]"
+            ],
+            bottom_titles=["Time Dimension"],
+            output_html="report/"+report_output+".html", 
+            partial_leakage=round(pl,2) * 100,
+            
+           p_leakage_time_min=np.mean(results["time"]["p_corr_pl_min"]),
+           p_leakage_time_max=np.mean(results["time"]["p_corr_pl_max"]),
+           p_leakage_time_avg=np.mean(results["time"]["p_corr_pl_avg"]), 
+            
+           s_leakage_time_min=np.mean(results["time"]["s_corr_pl_min"]),
+           s_leakage_time_max=np.mean(results["time"]["s_corr_pl_max"]),
+           s_leakage_time_avg=np.mean(results["time"]["s_corr_pl_avg"]), 
+             
+           full_leakage=fl)    
       
     return np.round(pl,2),fl
 
@@ -295,7 +346,7 @@ def test(pl,fl):
            f.write(line)
         except Exception as e:
             print(f"Error writing data to file {filename}: {str(e)}", file=sys.stderr) 
-    
+                
 def process_(original_list, scrambled_list, data_type):
     for o, s in tqdm.tqdm(zip(original_list, scrambled_list), total=len(original_list)):
         try:
@@ -315,9 +366,11 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error: {e}")
         sys.exit(1)
-                   
+
+ 
     orig = sys.argv[1]
     scra = sys.argv[2]
+              
              
     if detect_file(orig) == "nii":
         process_(fetch_files(orig).nii_(), fetch_files(scra).nii_(), data_type="func")
