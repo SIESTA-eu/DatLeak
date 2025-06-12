@@ -3,7 +3,7 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 ## Table of Contents
 - [Tabular DataLeak](#tabular-dataleak)
-  - [Method](#tabular-metho)
+  - [Method](#tabular-method)
   - [Usage](#tabular-usage)
 - [NeuroImaging DataLeak](#neuroimaging-dataleak)
 - [Purpose](#purpose)
