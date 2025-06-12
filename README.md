@@ -190,7 +190,7 @@ Maximum linear relation between one array of voxels in original image compared t
 \right.
 ```
 ## Test
-To be Added
+We provide a test case in Jupyter Notebook files, where an image is downloaded and different test cases are evaluated. The notebooks can be found in **test** folders. We elaborate further what would be the expectation after model evaluation.   
 
 ## HTML Report
 To ensure transparency and verification, and allow for visual inspection of the results, an optional HTML report can be generated alongside the leakage analysis. The report provides:
