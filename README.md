@@ -3,13 +3,13 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 ## Table of Contents
 - [Tabular DataLeak](#tabular-dataleak)
-  - [Method](#tabular-method)
-  - [Usage](#tabular-usage)
+  - [Method (Tabular)](#method-tabular)
+  - [Usage (Tabular)](#usage-tabular)
 - [NeuroImaging DataLeak](#neuroimaging-dataleak)
 - [Purpose](#purpose)
-  - [Method](#neuroimaging-method)
+  - [Method (NeuroImaging)](#method-neuroimaging)
   - [Pseudocode](#pseudocode)
-  - [Usage](#neuroimaging-usage)
+  - [Usage (NeuroImaging)](#usage-neuroimaging)
   - [Output](#output)
   - [Full/Partial Leakage Calculation](#fullpartial-leakage-calculation)
 - [HTML report](#html-report)
@@ -17,7 +17,8 @@ When anonymizing data, for instance, by randomizing data orders, it's important 
 
 # Tabular DataLeak
 Methods for detection of data leakage in a tabular dataset.
-## Method (Tabular) 
+## Method (Tabular)
+
 ### Full Leakage
 A row/participant $i$ is considered to have **full leakage** if the number of matching cells equals the number of valid cells in that row. The condition for full leakage for row $i$ is:
 
@@ -51,7 +52,7 @@ This formula checks if some, but not all, valid cells match between the original
 
 The script detects data leakage in a tabular dataset by comparing an original with an anonymized version. It calculates percentages of full leakage (all variables are the same), and partial leakage (some variables are the same). In the latter case, it does so by averaging matching cells (per row). The script accepts command-line inputs for the dataset files (CSV or TSV) and an optional ignore value.
 
-## Usage {#tabular-usage}
+## Usage (Tabular)
 
 ```
 python DatLeak.py <original_file> <scrambled_file> [ignore_value] [ignore_col]
@@ -133,7 +134,7 @@ return mean(3D)
 
 # Method 2
 ```
-## Usage {#neuroimaging-usage}
+## Usage (NeuroImaging)
 ```terminal
 python run.py <Original Base Dir> <Scrambled Base Dir> [report]
 ```
