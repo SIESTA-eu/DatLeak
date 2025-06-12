@@ -2,7 +2,7 @@
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
 # Purpose
-The purpose of this repository is to analyze information leakage in two different data types, namely **NeuroImaging** and **Tabular** a datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
+The purpose of this repository is to analyze information leakage in two different data types, namely **NeuroImaging** and **Tabular** datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
 
 
 ## Table of Contents
@@ -116,7 +116,7 @@ The idea of using three methods is to quantify information leakage where each is
 ```terminal
 # Given a dimension in [x, y, z]
 For slice i=0 to i=n-1: # for each original image slice
-    For j = 0 to j=n-1:   # comparing all slices of scrambled 
+    For j=0 to j=n-1:   # comparing all slices of scrambled 
     a. Extract 2D slices from original and scrambled based on axis:
         slice_o ← Original[plane/2D slice] 
         slice_s ← Scrambled[plane/2D slice] 
@@ -149,7 +149,7 @@ python run.py <Original Base Dir> <Scrambled Base Dir> [report]
 - Report is optional. Takes two arguments of True/False. By default is False
 ### Example
 ```terminal
-python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
+python run.py "usecase-2.2/input" "usecase-2.2/scrambled" False
 ```
 ## Output (NeuroImaging)
 ```terminal
@@ -160,8 +160,8 @@ python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
     - dim[z]  Full Leakage: 0/n voxels   Partial Leakage: leakage value
 - Temporal Analysis[if applicable]:
     - Full Leakage: 0/n voxels   Partial Leakage: leakage value
-- Partial Leakage: %
-- Full Leakage: %\begin{matrix}
+- Partial Leakage: numerical value
+- Full Leakage: True/False
 ```
 ## Full/Partial Leakage Calculation
 ### `Full Leakage:` 
