@@ -95,7 +95,11 @@ Standard Deviation of Matching Cells per Row: 1.68
 # NeuroImaging DataLeak
 DataLeakage analysis in NeuroImaging data
 
-
+**Supported BIDs NeuroImaging data type:**
+- 3/4D fMRI image
+- MEG (Magnetoencephalography)
+- EEG (Electroencephalography)
+  
 ## Method (NeuroImaging)
 The idea of using three methods is to quantify information leakage where each is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
 
@@ -110,8 +114,8 @@ The idea of using three methods is to quantify information leakage where each is
 ### 3D
 ```terminal
 # Given a dimension in [x, y, z]
-For slice i=0 to i=n: # for each original image slice
-    For j = 0 to j=n:   # comparing all slices of scrambled 
+For slice i=0 to i=n-1: # for each original image slice
+    For j = 0 to j=n-1:   # comparing all slices of scrambled 
     a. Extract 2D slices from original and scrambled based on axis:
         slice_o ← Original[plane/2D slice] 
         slice_s ← Scrambled[plane/2D slice] 
@@ -127,7 +131,7 @@ e. Calculate Full/Partial leakage
 ### 4D & 2D
 ```terminal
 # Method 1 [Spatial Analysis]
-For time t=0 to t=n: 
+For time t=0 to t=n-1: 
     a. compute as 3D as above
 return mean(3D)
 
@@ -162,7 +166,9 @@ python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
 ### `Full Leakage:` 
 We consider Full Leakage as exact identical array of voxels, and/or perfect linear relationship between voxels. Meaning if an original image is 100% identical to the scrambled version. If Pearson Correlation returns a value of [0.99999:1.0], backed up by np.allclose which returns similar value in any slice across any dimension of [x, y, z].
 ### `Partial Leakage:` 
+Partial Leakage is calculated from the distribution of **max values** extracted from the Pearson correlation matrices.
 
+Maximum linear relation between one array of voxels in original image compared to all arrays of voxels in the scrambled version, identifies how much information is leaked. Therefore we focus only on the **max values**. The below example matrix shows an array of correlations value of shape (x, x) reduces to (x, ) dimension, keeping only max values. [TO BE EDITED] 
 
 ```math
 \left.
