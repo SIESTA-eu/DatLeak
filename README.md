@@ -1,17 +1,23 @@
 # UNDER DEVELOPMENT
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
+# Purpose
+The purpose of this repository is to analyze information leakage in two different data types, namely **NeuroImaging** and **Tabular** a datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
+
+
 ## Table of Contents
+- [Purpose](#purpose)
 - [Tabular DataLeak](#tabular-dataleak)
   - [Method (Tabular)](#method-tabular)
   - [Usage (Tabular)](#usage-tabular)
+  - [Output (Tabular)](#output-tabular)
 - [NeuroImaging DataLeak](#neuroimaging-dataleak)
-- [Purpose](#purpose)
   - [Method (NeuroImaging)](#method-neuroimaging)
   - [Pseudocode](#pseudocode)
   - [Usage (NeuroImaging)](#usage-neuroimaging)
-  - [Output](#output)
+  - [Output (NeuroImaging)](#output-neuroimaging)
   - [Full/Partial Leakage Calculation](#fullpartial-leakage-calculation)
+  - [Test](#test)
 - [HTML report](#html-report)
 
 
@@ -73,7 +79,7 @@ python DatLeak.py test_files/data_original.tsv test_files/data_scramble.tsv
 ```
 
 
-### Ouput 
+## Output (Tabular) 
 
 ```
 Partial Leakage: 99.78%
@@ -87,12 +93,8 @@ Standard Deviation of Matching Cells per Row: 1.68
 - Standard Deviation of matching cells per row.
 
 # NeuroImaging DataLeak
+DataLeakage analysis in NeuroImaging data
 
-## Introduction
-**DataLeak**age analysis in neuro-imaging data
-
-## Purpose
-The purpose of this repository is to analyze information leakage in two neuro-imaging dataset of **Original** and **Scrambled/Synthetic**. We use 3 known methods to measure the similarity between slices by quantifying leakage across all dimensions of the image.
 
 ## Method (NeuroImaging)
 The idea of using three methods is to quantify information leakage is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
@@ -144,7 +146,7 @@ python run.py <Original Base Dir> <Scrambled Base Dir> [report]
 ```terminal
 python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
 ```
-## Output
+## Output (NeuroImaging)
 ```terminal
  - File shape: (x, y, z, [t])
  - Subject ID: ID
@@ -156,13 +158,10 @@ python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
 ```
 ## Full/Partial Leakage Calculation
 ### `Full Leakage:` 
-We consider Full Leakage as identical. Meaning if an original image is 100% identical to the scrambled version. If Pearson Correlation returns a value of [0.999 - 1.0], backed up by SSIM/np.allclose return similar value in any slice across any dimension of [x, y, z].
+We consider Full Leakage as exact identical array of voxels, and/or perfect linear relationship between voxels. Meaning if an original image is 100% identical to the scrambled version. If Pearson Correlation returns a value of [0.99999:1.0], backed up by np.allclose which returns similar value in any slice across any dimension of [x, y, z].
 ### `Partial Leakage:` 
-Partial Leakage is calculated by using a threshold range of [0.5 - 0.999] from the distribution of **max values** extracted from the Pearson correlation, SSIM, and np.allclose matrices.
-- `x` refers to the dimensions of an image in the format dim[x, y, z], and `o,s` are `original` and `scrambled` respectively.
-- The left matrix represents the **Pearson correlation** matrix with shape **(x, x)**, where `shape[0]` corresponds to the original dimensions, and `shape[1]` is the correlation between the original and scrambled images.
-- The right matrix of shape **(x,)** shows the **maximum values** for each dimension, alongside their respective `x_original` and `x_scrambled` values.
-From these matrices, Partial Leakage is computed based on the specified threshold.
+
+
 ```math
 \left.
   \begin{matrix}
@@ -182,15 +181,19 @@ From these matrices, Partial Leakage is computed based on the specified threshol
   \end{matrix}
 \right.
 ```
+## Test
+To be Added
 
 ## HTML Report
-To ensure transparency and verification, and allow for visual inspection of the results, an optional HTML report is generated alongside the leakage analysis. This report provides:
+To ensure transparency and verification, and allow for visual inspection of the results, an optional HTML report can be generated alongside the leakage analysis. The report provides:
 
-- A side-by-side visual snapshot of the original and scrambled data slices.
+- A side-by-side visual snapshot of the original and scrambled data of different dimensions.
+    - In case of MEG/EEG files, the plots will be Power Spectral Density (PSD)
 - A summary table displaying the computed values for:
-    - Pearson correlation: min, max, mean along [x, y, z] dim
-    - SSIM: min, max, mean along [x, y, z] dim
-- Plots visualizing the distribution of correlation values, helping identify any unexpected alignment or leakage patterns.
-    - Total distribution plot
-    - Threshold distribution plot: Threshold is set between 0.5 - 0.999
-
+    - Pearson correlation: min, max, mean along [x, y, z] dimension
+    - SSIM: min, max, mean along [x, y, z] dimension
+- Plots visualizing the distribution of correlation values, helping to identify any unexpected alignment or leakage patterns.
+    - Total distribution plots of correlations
+    - Distribution plots of maximum values of potential leakage.
+    - Identical voxels plot
+    - Correlation distribution along time dimension. If applicable to time 
