@@ -96,7 +96,8 @@ Standard Deviation of Matching Cells per Row: 1.68
 DataLeakage analysis in NeuroImaging data
 
 **Supported BIDs NeuroImaging data type:**
-- 3/4D fMRI image
+- 3D structural T1-weighted fMRI
+- 4D fMRI image
 - MEG (Magnetoencephalography)
 - EEG (Electroencephalography)
   
@@ -190,7 +191,7 @@ Maximum linear relation between one array of voxels in original image compared t
 \right.
 ```
 ## Test
-We provide a test case in Jupyter Notebook files, where an image is downloaded and different test cases are evaluated. The notebooks can be found in **test** folders. We elaborate further what would be the expectation after model evaluation.   
+We provide a test case in Jupyter Notebook files, where an image is downloaded and different test cases are evaluated. The notebooks can be found in **NeuroImaging/test/** folders. We elaborate further what would be the expectation after model evaluation.   
 
 ## HTML Report
 To ensure transparency and verification, and allow for visual inspection of the results, an optional HTML report can be generated alongside the leakage analysis. The report provides:
