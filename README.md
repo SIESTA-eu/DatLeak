@@ -97,44 +97,44 @@ DataLeakage analysis in NeuroImaging data
 
 
 ## Method (NeuroImaging)
-The idea of using three methods is to quantify information leakage is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
+The idea of using three methods is to quantify information leakage where each is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
 
-`NOTE` Due to the computationally intensive nature of comparing large 3D to 4D arrays slice by slice, we implemented SSIM and Pearson correlation manually instead of using built-in functions from libraries like scipy. To optimize performance, we use [`numba`](https://pypi.org/project/numba/) to JIT-compile the function. However, numba does not support external Python callables like scipy.stats.pearsonr or skimage.ssim
+`NOTE` Due to the computationally intensive nature of comparing large 3D to 4D arrays slice by slice, we implemented SSIM and Pearson correlation manually instead of using built-in functions from libraries like scipy. To optimize performance, we use [`numba`](https://pypi.org/project/numba/) to JIT compile the function. However, numba does not support external Python callables like scipy.stats.pearsonr or skimage.ssim.
 - [`Pearson:`](https://en.wikipedia.org/wiki/Pearson_correlation_coefficient) Pearson correlation coefficients
     - Useful for detecting global similarity patterns. However sensitive to scaling and outliers, but effective when relationships are purely linear.
 - [`SSIM:`](https://en.wikipedia.org/wiki/Structural_similarity_index_measure) Structural similarity index measure
     - SSIM is designed to measure perceptual similarity, which takes into account luminance, contrast, and structure.
- 
 - [`np.allclose:`](https://numpy.org/doc/stable/reference/generated/numpy.allclose.html) Boolean matrix showing exact match (leakage) in centered data
-    - A strict comparison to identify almost exact matches, indicating serious leakage. It also helps to detect accidental duplication or information leakage due to transformations.
+    - A strict comparison to identify exact matches, indicating serious leakage. It also helps to detect accidental duplication or information leakage due to transformations.
 ### Pseudocode
 ### 3D
 ```terminal
 # Given a dimension in [x, y, z]
-For slice i = 0 to shape − 1: # for each original image slice
-    For j = 0 to shape − 1:   # comparing all slices of scrambled 
-    a. Extract 2D slices from data_o and data_s based on axis:
-        If axis = 0,1,2: # representing [x, y, z]
-            slice_o ← data_o[i, :, :] # extracting a plane/2D slice of original
-            slice_s ← data_s[j, :, :] # extracting a plane/2D slice of scrambled
+For slice i=0 to i=n: # for each original image slice
+    For j = 0 to j=n:   # comparing all slices of scrambled 
+    a. Extract 2D slices from original and scrambled based on axis:
+        slice_o ← Original[plane/2D slice] 
+        slice_s ← Scrambled[plane/2D slice] 
     b. Full leakage check:
-        f_l_corrs[i, j] ← allclose(slice_o, slice_s)
+        f_l_corrs ← np.allclose(slice_o, slice_s)
     c. Compute Pearson correlation:
-        p_corrs[i, j] ← p_corr(slice_o, slice_s)
-    d. Compute SSIM:
-        s_corrs[i, j] ← ssim(slice_o, slice_s)
-return p_corrs, s_corrs, f_l_corrs
-# returns a numpy array of shape (x,x), (y,y) or (z,z)
+        p_corrs ← p_corr(slice_o, slice_s)
+    d. Compute SSIM score:
+        s_corrs ← ssim(slice_o, slice_s)
+return a numpy array of computed in shape (x,x), (y,y) or (z,z)
+e. Calculate Full/Partial leakage
 ```
-### 4D
-
+### 4D & 2D
 ```terminal
-# Method 1
-For time t = 0 to shape − 1: 
-    a. compute 3D as above
+# Method 1 [Spatial Analysis]
+For time t=0 to t=n: 
+    a. compute as 3D as above
 return mean(3D)
 
-# Method 2
+# Method 2 [Temporal Analysis]
+a. Extract 1 array of voxels along time dimension in either origianl or scrambled
+b. Calculate Pearson corr, SSIM, np.allclose
+c. Calculate Full/Partial leakage
 ```
 ## Usage (NeuroImaging)
 ```terminal
@@ -148,11 +148,13 @@ python run.py "usecase2.2/input" "usecase2.2/scrambled" False"
 ```
 ## Output (NeuroImaging)
 ```terminal
- - File shape: (x, y, z, [t])
- - Subject ID: ID
-    - Partial Leakage[X]: leakage value
-    - Partial Leakage[Y]: leakage value
-    - Partial Leakage[Z]: leakage value
+- Image Info
+- Spatial Analysis:
+    - dim[x]  Full Leakage: 0/n voxels   Partial Leakage: leakage value
+    - dim[y]  Full Leakage: 0/n voxels   Partial Leakage: leakage value
+    - dim[z]  Full Leakage: 0/n voxels   Partial Leakage: leakage value
+- Temporal Analysis[if applicable]:
+    - Full Leakage: 0/n voxels   Partial Leakage: leakage value
 - Partial Leakage: %
 - Full Leakage: %\begin{matrix}
 ```
@@ -197,3 +199,4 @@ To ensure transparency and verification, and allow for visual inspection of the 
     - Distribution plots of maximum values of potential leakage.
     - Identical voxels plot
     - Correlation distribution along time dimension. If applicable to time 
+Note: HTML report targets only NeuroImaging data.
