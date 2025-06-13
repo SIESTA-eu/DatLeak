@@ -21,7 +21,9 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
            s_leakage_z_min=0.0,
            s_leakage_z_max=0.0,
            s_leakage_z_avg=0.0,           
-           full_leakage=0.0):
+           full_leakage=0.0,
+           spatiotemporal=False,
+           spatiotemporal_image_path=None):
     def encode_image_base64(path):
         with open(path, "rb") as img_file:
             encoded = base64.b64encode(img_file.read()).decode("utf-8")
@@ -34,7 +36,7 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
         bottom_titles = [f"Bottom Image {i+1}" for i in range(3)]
     try:
         rep_dir = os.path.dirname(os.path.abspath(__file__))
-        rep_dir = os.path.join(log_dir, '.report')
+        rep_dir = os.path.join(log_dir, 'report')
     except NameError:
         rep_dir = os.path.join(os.getcwd(), 'report')  
 
@@ -42,6 +44,22 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
     
     top_encoded = [encode_image_base64(p) for p in top_image_paths]
     bottom_encoded = [encode_image_base64(p) for p in bottom_image_paths]
+
+    if spatiotemporal and spatiotemporal_image_path:
+        spatiotemporal_encoded = encode_image_base64(spatiotemporal_image_path)
+        spatiotemporal_section = f"""
+    <h2 style="margin-top: 60px; text-align: center;">SpatioTemporal Analysis</h2>
+    <div class="image-row" style="justify-content: center;">
+        <div class="image-box">
+            <img src="{spatiotemporal_encoded}" alt="SpatioTemporal Analysis" onclick="showModal(this.src)">
+            <h3>SpatioTemporal Analysis</h3>
+        </div>
+    </div>
+"""
+    else:
+        spatiotemporal_section = f"""
+    <h2 style="margin-top: 60px; text-align: center; color: #999;">SpatioTemporal Analysis not available</h2>
+"""
 
     html_template = f"""
 <!DOCTYPE html>
@@ -97,7 +115,7 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
             justify-content: space-around;
             align-items: flex-start;
             gap: 20px;
-            margin-top: 60px;
+            margin-top: 20px;
         }}
         .image-box {{
             flex: 1;
@@ -214,7 +232,8 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
         </div>
     </div>
 
-    <!-- Bottom row of small images -->
+    <!-- Spatial Analysis section -->
+    <h2 style="margin-top: 60px; text-align: center;">Spatial Analysis</h2>
     <div class="image-row">
         {"".join(f'''
         <div class="image-box">
@@ -222,6 +241,9 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
             <h3>{bottom_titles[i]}</h3>
         </div>''' for i in range(3))}
     </div>
+
+    <!-- Spatiotemporal Analysis section (conditional) -->
+    {spatiotemporal_section}
 
     <!-- Lightbox modal -->
     <div id="imgModal" class="modal" onclick="closeModal()">

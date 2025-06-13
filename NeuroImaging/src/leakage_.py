@@ -124,4 +124,35 @@ def leakage_2D(data_o: np.ndarray, data_s: np.ndarray) -> float:
         else:
             f_l_corrs[i] = np.allclose(cube_o, cube_s, atol=1e-11) # by default atol=1e-08  
     return p_corrs, s_corrs,f_l_corrs
+    
 
+@njit
+def pearson_corr(x, y):
+
+    valid_mask = ~np.isnan(x) & ~np.isnan(y)
+    x = x[valid_mask]
+    y = y[valid_mask]
+    if len(x) < 2:
+        return np.nan
+    mean_x = np.mean(x)
+    mean_y = np.mean(y)
+    std_x = np.sqrt(np.sum((x - mean_x)**2) / (len(x) - 1))
+    std_y = np.sqrt(np.sum((y - mean_y)**2) / (len(y) - 1))
+    if std_x == 0 or std_y == 0:
+        return np.nan
+    corr = np.sum((x - mean_x) * (y - mean_y)) / ((len(x) - 1) * std_x * std_y)
+    return corr
+
+@njit(parallel=True)
+def permutation_test(original_ts, scrambled_ts, n_permutations=10000):
+
+    obs_corr = pearson_corr(original_ts, scrambled_ts)
+    null_corrs = np.zeros(n_permutations)
+    combined = np.concatenate((original_ts, scrambled_ts))
+    
+    for i in prange(n_permutations):
+        permuted = np.random.permutation(combined)
+        null_corrs[i] = pearson_corr(permuted[:len(original_ts)], permuted[len(original_ts):])
+    
+    p_value = (np.sum(null_corrs >= obs_corr) + 1) / (n_permutations + 1)  # Avoid p=0
+    return obs_corr, p_value

@@ -188,12 +188,13 @@ def report_meg(top_image_paths, bottom_image_paths, output_html="report_embedded
                 <p><strong>Pearson Correlation:</strong></p>
                 <div class="leakage-details">
                     <p><strong>Time Dimension</strong>: Min: {p_leakage_time_min:.2f}&emsp;&emsp;&emsp;Max: {p_leakage_time_max:.2f}&emsp;&emsp;&emsp;AVG: {p_leakage_time_avg:.2f}</p>
-                    
+                <!--
                 </div>
                 <p><strong>SSIM Score:</strong></p>
                 <div class="leakage-details">
                     <p><strong>Time Dimension</strong>: Min: {s_leakage_time_min:.2f}&emsp;&emsp;&emsp;Max: {s_leakage_time_max:.2f}&emsp;&emsp;&emsp;AVG: {s_leakage_time_avg:.2f}</p>
-                    
+                
+                -->
                 </div>
             </div>
         </div>

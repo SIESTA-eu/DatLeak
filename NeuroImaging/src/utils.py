@@ -28,26 +28,44 @@ def detect_file(folder):
         return None 
 
 
-def leak_detect(results, type_):
+def leak_detect(results, type_,dim4result=None):
     if type_ == "anat" or type_ == "func": 
+        pl = np.nanmean([results["x"]['p_corr_pl_max'], results["y"]['p_corr_pl_max'],results["z"]['p_corr_pl_max']])
+
         fl_p = np.nanmean([results["x"]['p_corr_fl'], results["z"]['p_corr_fl'], results["y"]['p_corr_fl']])
         fl_f = np.nanmean([results["x"]['f_corr_fl'], results["z"]['f_corr_fl'], results["y"]['f_corr_fl']])
+        
+        conditions = list()
+        #first from spatial, partial leakage
+        conditions.append(results["x"]['p_corr_pl_max'][0] >= .999 or 
+                         results["y"]['p_corr_pl_max'][0] >= .999 or 
+                         results["z"]['p_corr_pl_max'][0] >= .999)
+        #second from spatial, full leakage
         if fl_p == 0.0 and fl_f == 0.0:
-            fl = False
-        else: fl = True
-        pl = np.nanmean([results["x"]['p_corr_pl_max'], results["y"]['p_corr_pl_max'],results["z"]['p_corr_pl_max']])
+            conditions.append(False)
+            
+        if type_ == "func":        
+            # third from temporal, full leakage
+            conditions.append(dim4result["fl"])
+            # four from temporal, partial leakage
+            if dim4result["pl"] >= .999:
+                conditions.append(True)
+            else: conditions.append(False)
+        
+        fl = any(conditions)
+        
         return fl, pl
 
-    if type_ == "fif":
-        fl, pl = results["fl"], results["pl"]
-        return fl, pl
-    if type_ == "vhdr":
+    if type_ == "vhdr" or type_ == "fif":
+        pl = np.nanmean(results["time"]['p_corr_pl_max'])
         fl_p = np.nanmean(results["time"]['p_corr_fl'])
         fl_f = np.nanmean(results["time"]['f_corr_fl'])
         if fl_p == 0.0 and fl_f == 0.0:
             fl = False
+        elif fl_p <= 0.999999 or fl_f <= 0.999999 or pl <= 0.999999:
+            fl = False
         else: fl = True
-        pl = np.nanmean(results["time"]['p_corr_pl_max'])
+        
         return fl, pl
 
 
