@@ -2,7 +2,7 @@
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
 # Purpose
-The purpose of this repository is to analyze information leakage in two different data types of **NeuroImaging** and **Tabular** datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
+The purpose of this repository is to analyze information leakage in two different data types of **NeuroImaging** and **Tabular** datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. 
 
 
 ## Table of Contents
@@ -102,6 +102,8 @@ DataLeakage analysis in NeuroImaging data
 - EEG (Electroencephalography)
   
 ## Method (NeuroImaging)
+We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
+
 The idea of using three methods is to quantify information leakage where each is to complement each other’s strengths and limitations, providing a more robust and comprehensive assessment of potential leakage between the original and scrambled data.
 
 `NOTE` Due to the computationally intensive nature of comparing large 3D to 4D arrays slice by slice, we implemented SSIM and Pearson correlation manually instead of using built-in functions from libraries like scipy. To optimize performance, we use [`numba`](https://pypi.org/project/numba/) to JIT compile the function. However, numba does not support external Python callables like scipy.stats.pearsonr or skimage.ssim.
