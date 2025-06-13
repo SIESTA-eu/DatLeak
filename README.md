@@ -2,7 +2,7 @@
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
 # Purpose
-The purpose of this repository is to analyze information leakage in two different data types, namely **NeuroImaging** and **Tabular** datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
+The purpose of this repository is to analyze information leakage in two different data types of **NeuroImaging** and **Tabular** datasets. Each of which consist of **Original** and **Scrambled/Synthetic** versions. We use 3 known methods to measure the similarity between two versions by quantifying information leakage across all dimensions of dataset.
 
 
 ## Table of Contents
