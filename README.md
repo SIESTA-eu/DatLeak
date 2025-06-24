@@ -1,4 +1,3 @@
-# UNDER DEVELOPMENT
 When anonymizing data, for instance, by randomizing data orders, it's important to implement safeguards against potential data leakage. Data leakage can occur if scrambled variables inadvertently retain patterns that could be traced back to the original participants. Hence DatLeak can be run to test for data leakage. 
 
 # Purpose
@@ -171,7 +170,7 @@ We consider Full Leakage as exact identical array of voxels, and/or perfect line
 ### `Partial Leakage:` 
 Partial Leakage is calculated from the distribution of **max values** extracted from the Pearson correlation matrices.
 
-Maximum linear relation between one array of voxels in original image compared to all arrays of voxels in the scrambled version, identifies how much information is leaked. Therefore we focus only on the **max values**. The below example matrix shows an array of correlations value of shape (x, x) reduces to (x, ) dimension, keeping only max values. [TO BE EDITED] 
+Maximum linear relation between one array of voxels in original image compared to all arrays of voxels in the scrambled version, identifies how much information is leaked. Therefore we focus only on the **max values**. The below example matrix shows an array of correlations value of shape (x, x) reduces to (x, ) dimension, keeping only max values, where the average of thse max value indicates partial leakage in the give axis.
 
 ```math
 \left.
