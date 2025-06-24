@@ -191,7 +191,7 @@ Maximum linear relation between one array of voxels in original image compared t
   \end{matrix}
 \right\}
 \quad
-\tex{Average = partial leakage}
+\text{Average = partial leakage}
 ```
 ## Test
 We provide a test case in Jupyter Notebook files, where an image is downloaded and different test cases are evaluated. The notebooks can be found in **NeuroImaging/test/** folders. We elaborate further what would be the expectation after model evaluation.   
