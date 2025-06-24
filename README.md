@@ -189,7 +189,9 @@ Maximum linear relation between one array of voxels in original image compared t
     \vdots \\
     x_{\text{max}N}
   \end{matrix}
-\right.
+\right\}
+\quad
+partial leakage
 ```
 ## Test
 We provide a test case in Jupyter Notebook files, where an image is downloaded and different test cases are evaluated. The notebooks can be found in **NeuroImaging/test/** folders. We elaborate further what would be the expectation after model evaluation.   
