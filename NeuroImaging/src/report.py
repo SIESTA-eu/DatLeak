@@ -48,17 +48,17 @@ def report(top_image_paths, bottom_image_paths, output_html="report_embedded.htm
     if spatiotemporal and spatiotemporal_image_path:
         spatiotemporal_encoded = encode_image_base64(spatiotemporal_image_path)
         spatiotemporal_section = f"""
-    <h2 style="margin-top: 60px; text-align: center;">SpatioTemporal Analysis</h2>
+    <h2 style="margin-top: 60px; text-align: center;">Temporal Analysis</h2>
     <div class="image-row" style="justify-content: center;">
         <div class="image-box">
-            <img src="{spatiotemporal_encoded}" alt="SpatioTemporal Analysis" onclick="showModal(this.src)">
+            <img src="{spatiotemporal_encoded}" alt="Temporal Analysis" onclick="showModal(this.src)">
             <h3>SpatioTemporal Analysis</h3>
         </div>
     </div>
 """
     else:
         spatiotemporal_section = f"""
-    <h2 style="margin-top: 60px; text-align: center; color: #999;">SpatioTemporal Analysis not available</h2>
+    <h2 style="margin-top: 60px; text-align: center; color: #999;">Temporal Analysis not available</h2>
 """
 
     html_template = f"""

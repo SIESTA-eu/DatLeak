@@ -51,47 +51,23 @@ def viz_report(p_corrs, s_corrs, f_l_corrs,loop, file_shape=None):
     plt.savefig("img/"+"correlations dist along dimension " + str(loop) + ".png")
     plt.close()
     
-def viz_spatiotemporal(p_corrs, s_corrs,f_l_corrs, file_shape=None, ext=None):
+def viz_spatiotemporal(p_corrs, s_corrs,f_l_corrs, file_shape=None):
     
     hist_kws = {'edgecolor': 'black', 'linewidth': 0.5}
-    if ext == "nii":
-        fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10), sharex=False, gridspec_kw={'height_ratios': [3, 3, 3]})
-        num_bins = 200
-        #num_bins = min(50, max(1, int(np.sqrt(len(np.unique(np.nanmax(p_corrs)))))))
-        #if num_bins < 2: 
-        #    num_bins = 100
-        sns.histplot(p_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax1, **hist_kws)
-        ax1.set_title(f"File Shape: {file_shape}\nSpatioTemporal Pearson Correlations")
-        ax1.set_xlabel("Correlation Coefficient")
-        ax1.set_ylabel("Frequency")
-        ax1.grid(True, linestyle='--', alpha=0.5)
-    
-        sns.histplot(s_corrs.flatten(), bins = num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws)
-        ax2.set_title("SpatioTemporal SSIM score")
-        ax2.set_xlabel("Correlation Coefficient")
-        ax2.set_ylabel("Frequency")
-        ax2.grid(True, linestyle='--', alpha=0.5)
 
-        sns.histplot(f_l_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax3, **hist_kws)
-        ax3.set_title("SpatioTemporal unique vectors")
-        ax3.set_xlabel("Correlation Coefficient")
-        ax3.set_ylabel("Frequency")
-        ax3.grid(True, linestyle='--', alpha=0.5)
-    
-    elif ext == "fif" or ext == "vhdr":
-        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=False, gridspec_kw={'height_ratios': [3, 3]})
-        num_bins = 200
-        sns.histplot(p_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax1, **hist_kws)
-        ax1.set_title(f"File Shape: {file_shape}\nSpatioTemporal Pearson Correlations")
-        ax1.set_xlabel("Correlation Coefficient")
-        ax1.set_ylabel("Frequency")
-        ax1.grid(True, linestyle='--', alpha=0.5)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10), sharex=False, gridspec_kw={'height_ratios': [3, 3]})
+    num_bins = 200
+    sns.histplot(p_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax1, **hist_kws)
+    ax1.set_title(f"File Shape: {file_shape}\nTemporal Pearson Correlations")
+    ax1.set_xlabel("Correlation Coefficient")
+    ax1.set_ylabel("Frequency")
+    ax1.grid(True, linestyle='--', alpha=0.5)
 
-        sns.histplot(f_l_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws)
-        ax2.set_title("SpatioTemporal unique vectors")
-        ax2.set_xlabel("Correlation Coefficient")
-        ax2.set_ylabel("Frequency")
-        ax2.grid(True, linestyle='--', alpha=0.5)
+    sns.histplot(f_l_corrs.flatten(), bins=num_bins, kde=True, color='skyblue', ax=ax2, **hist_kws)
+    ax2.set_title("Temporal unique vectors")
+    ax2.set_xlabel("Correlation Coefficient")
+    ax2.set_ylabel("Frequency")
+    ax2.grid(True, linestyle='--', alpha=0.5)
 
     plt.tight_layout()
     plt.savefig("img/correlations dist along Time.png")
